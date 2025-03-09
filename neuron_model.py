@@ -608,6 +608,17 @@ class NeuronModel:
     def find_unstable_limit_cycle(self, I_ext, dt=0.025, T_max=2000):
         '''
             Find the unstable limit cycle for the subcritical Hopf bifurcation
+            I_ext : float
+                External current value
+            dt : float  
+                Time step for simulation        
+            T_max : float
+                Maximum simulation time 
+
+            Returns:    
+            --------    
+            V_cycle, n_cycle : arrays
+                Voltage and gating variable traces for one cycle
         '''
         self.dt = dt # Store dt for use in dALLdt
         I_ext_array = np.ones(int(T_max/dt)) * I_ext
