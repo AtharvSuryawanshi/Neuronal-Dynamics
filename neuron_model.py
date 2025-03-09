@@ -1,19 +1,27 @@
 import numpy as np
-from scipy.integrate import odeint      
+from scipy.integrate import odeint
+
 
 class NeuronModel:
-    def __init__(self, bifurcation_type = 'saddle-node'):
+    def __init__(self, bifurcation_type='saddle-node'):
+        '''
+            Simplified Hodgkin-Huxley model of a neuron with two state variables (persistent I_Na + I_K).
+
+            Parameters are from Izhikevich, E. M. (2007). Dynamical systems in neuroscience: the geometry of excitability and bursting. MIT press.
+        
+        '''
         self.bifurcation_type = bifurcation_type
-        assert self.bifurcation_type in ['saddle-node', 'SNIC', 'subcritical_Hopf', 'supercritical_Hopf']
+
+        assert bifurcation_type in ['saddle-node', 'SNIC', 'subcritical_Hopf', 'supercritical_Hopf']
 
         if bifurcation_type in ['saddle-node', 'SNIC']:
             self.potassium_threshold = 'high'
         else:
             self.potassium_threshold = 'low'
 
-        # all constant params of neurons
-        # sample values only
-        self.C_m  = 1.0  # capacitance
+        # Membrane capacitance (μF/cm²)
+        self.C_m = 1.0
+        
         # Maximum conductances (mS/cm²)
         if self.bifurcation_type == 'subcritical_Hopf':
             self.g_Na = 4    
@@ -22,12 +30,12 @@ class NeuronModel:
         else:
             self.g_Na = 20    
             self.g_K = 10     
-            self.g_L = 8   
+            self.g_L = 8     
 
-        # reversal potential
+        # Reversal potentials (mV)
         self.E_Na = 60.0
-        self.E_K  = -90.0
-        
+        self.E_K = -90.0
+
         if self.potassium_threshold == 'high':  
             self.E_L = -80
             self.V_mid_n = -25
@@ -45,28 +53,24 @@ class NeuronModel:
             
         self.k_n = 5
 
-
     def m_inf(self, V):
         """Steady-state value of m (sodium activation)"""
         return 1 / (1 + np.exp(-(V - self.V_mid_m) / self.k_m))
     
     def n_inf(self, V):
+       # print('V:', V)
         """Steady-state value of n (potassium activation)"""
         return 1 / (1 + np.exp(-(V - self.V_mid_n) / self.k_n))
     
     def tau_n(self, V):
-        """Time constant of n (potassium activation)"""
-        return 1 # non saddle node 
-        # return 1 / (0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))) 
-    
-    # def tau_m(self, V):
-    #     return 0.1 + 0.4 / (1 + np.exp(-(V + 40) / 10)) 
-    
-    # def tau_h(self, V):
-    #     return 0.07 + 0.8 / (1 + np.exp(-(V + 65) / 10))    
-    
-    # def h_inf(self, V):
-    #     return 1 / (1 + np.exp(-(V + 40) / 10))
+        if self.bifurcation_type == 'SNIC':
+            return 1
+        if self.bifurcation_type == 'saddle-node':
+            return 0.152
+        if self.bifurcation_type == 'subcritical_Hopf':
+            return 1
+        if self.bifurcation_type == 'supercritical_Hopf':
+            return 1
     
     def I_Na(self, V):
         """Sodium current"""
@@ -79,7 +83,7 @@ class NeuronModel:
     def I_L(self, V):
         """Leak current"""
         return self.g_L * (V - self.E_L)
-    
+
     @staticmethod
     def create_step_current(t, step_time, step_duration, baseline, amplitude):
         """
@@ -192,10 +196,7 @@ class NeuronModel:
             dV2, dn2 = self.dALLdt([V-eps, n], 0, lambda t: I_ext)
             dV3, dn3 = self.dALLdt([V, n+eps], 0, lambda t: I_ext)
             dV4, dn4 = self.dALLdt([V, n-eps], 0, lambda t: I_ext)
-            print(dV1)
-            # Ensure dV and dn are scalars
-            dV1, dV2, dV3, dV4 = dV1[0], dV2[0], dV3[0], dV4[0]
-            # dn1, dn2, dn3, dn4 = dn1[0], dn2[0], dn3[0], dn4[0]
+            
             J = np.array([
                 [(dV1 - dV2)/(2*eps), (dV3 - dV4)/(2*eps)],
                 [(dn1 - dn2)/(2*eps), (dn3 - dn4)/(2*eps)]
@@ -263,8 +264,6 @@ class NeuronModel:
 
     def V_nullcline(self, V, I_ext):
         """V nullcline"""
-        if len(V) != len(I_ext):
-            raise ValueError("V and I_ext must have the same length")
         return (I_ext - self.I_Na(V) - self.I_L(V)) / (self.g_K * (V - self.E_K))
     
     def n_nullcline(self, V):
@@ -776,4 +775,4 @@ class NeuronModel:
             else:
                 return np.arange(len(V)) * dt, V
         except:
-            return None, None 
+            return None, None
