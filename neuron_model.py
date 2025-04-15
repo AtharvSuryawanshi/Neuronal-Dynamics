@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 
 
 class NeuronModel:
-    def __init__(self, bifurcation_type='saddle-node'):
+    def __init__(self, bifurcation_type='saddle_node'):
         '''
             Simplified Hodgkin-Huxley model of a neuron with two state variables (persistent I_Na + I_K).
 
@@ -12,9 +12,9 @@ class NeuronModel:
         '''
         self.bifurcation_type = bifurcation_type
 
-        assert bifurcation_type in ['saddle-node', 'SNIC', 'subcritical_Hopf', 'supercritical_Hopf']
+        assert bifurcation_type in ['saddle_node', 'SNIC', 'subcritical_Hopf', 'supercritical_Hopf']
 
-        if bifurcation_type in ['saddle-node', 'SNIC']:
+        if bifurcation_type in ['saddle_node', 'SNIC']:
             self.potassium_threshold = 'high'
         else:
             self.potassium_threshold = 'low'
@@ -65,7 +65,7 @@ class NeuronModel:
     def tau_n(self, V):
         if self.bifurcation_type == 'SNIC':
             return 1
-        if self.bifurcation_type == 'saddle-node':
+        if self.bifurcation_type == 'saddle_node':
             return 0.152
         if self.bifurcation_type == 'subcritical_Hopf':
             return 1
@@ -562,7 +562,7 @@ class NeuronModel:
                 break
         
         if saddle_point is None:
-            raise ValueError("No saddle point found. This might not be a saddle-node bifurcation case.")
+            raise ValueError("No saddle point found. This might not be a saddle_node bifurcation case.")
         
         # Get the stable eigenvector (corresponding to negative eigenvalue)
         eigenvals = saddle_point['eigenvalues']
@@ -665,7 +665,7 @@ class NeuronModel:
 
     def find_limit_cycle(self, I_ext, dt=0.01, T_max=200, T_start=None):
         """
-        Return one cycle of the limit cycle after discarding transients (saddle-node bifurcation)
+        Return one cycle of the limit cycle after discarding transients (saddle_node bifurcation)
         
         Parameters:
         -----------

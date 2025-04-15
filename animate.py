@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from model import NeuronModel
+from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
 sub_hop = NeuronModel('subcritical_Hopf')
