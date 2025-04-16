@@ -60,6 +60,9 @@ line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1])
 for eq in equilibria:
     ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3)
 ax2.plot(limit_cycle[0], limit_cycle[1], color='indigo', linestyle='--', label='Limit Cycle', alpha = 0.5)
+V_vals = np.linspace(-80, 20, 100)
+ax2.plot(V_vals, neuron.V_nullcline(V_vals, 0), color='red', linestyle='--', label='V Nullcline', alpha = 0.5)
+ax2.plot(V_vals, neuron.n_nullcline(V_vals), color='green', linestyle='--', label='n Nullcline', alpha = 0.5)
 ax2.legend()
 
 # --- Bottom Panel (Current vs Time) ---

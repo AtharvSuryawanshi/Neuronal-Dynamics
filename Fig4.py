@@ -14,14 +14,14 @@ from neuron_model import NeuronModel
 
 neuron = NeuronModel('subcritical_Hopf')    
 dt = 0.01   
-T = 20
+T = 50
 t = np.arange(0, T, dt)
 
 # Creating different input currents
-I_step = neuron.create_step_current(t, 1, 80, 0, 10)
+I_step = neuron.create_step_current(t, 10, 20, 0, 20)
 I_ramp = neuron.create_ramp_current(t, 1, 10, 0, 5)
-pulse_times = [0, 5, 10]  
-I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
+pulse_times = [0, 5, 10, 20, 30]  
+I_pulse = neuron.create_pulse_train(t, pulse_times, 1, 0, 50)
 I_ext = I_pulse
 a = neuron.simulate(T, dt, [-70, 0], I_ext)    
 
