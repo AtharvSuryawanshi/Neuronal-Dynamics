@@ -5,10 +5,10 @@ import matplotlib.gridspec as gridspec
 from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
-# Fig: V and n nullclines and their change with time 
+# Fig: V and n nullclines and their change with time,also limit cycle
 
 
-neuron = NeuronModel('supercritical_Hopf')  
+neuron = NeuronModel('saddle_node')  
 dt = 0.01
 T = 12
 t = np.arange(0, T, dt)
@@ -16,6 +16,7 @@ t = np.arange(0, T, dt)
 # Creating different input currents
 I_step = neuron.create_step_current(t, 1, 80, 0, 0)
 I_ramp = neuron.create_ramp_current(t, 1, 10, -5, 30)
+# I_ramp = neuron.create_ramp_current(t, 1, 10, 20, 70)
 pulse_times = [0, 6, 10, 15, 20, 30, 31]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
 I_ext = I_ramp

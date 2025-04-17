@@ -78,8 +78,5 @@ ani = animation.FuncAnimation(fig, update, frames=len(a1[1]), interval=0.1, blit
 plt.tight_layout()
 plt.show()
 
-# from matplotlib.animation import FFMpegWriter
+# ani.save("Neuronal-Dynamics/animations/Fig3.gif", writer='pillow', fps=30)
 
-# writer = FFMpegWriter(fps=30, metadata=dict(artist='YourName'), bitrate=1800)
-
-# ani.save("animation.mp4", writer=writer)
