@@ -5,14 +5,10 @@ import matplotlib.gridspec as gridspec
 from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
-# Fig : Saddle node neuron model
-# Showing perturbations and limit cycle
-# Starts from unstable node, spins in cycle, perturbs to go to stable node
-# Demonstrate how you got these points
-# Stable, unstable and saddle nodes
-# Limit cycle and equilibria points
+# Fig: V and n nullclines and their change with time 
 
-neuron = NeuronModel()
+
+neuron = NeuronModel('supercritical_Hopf')  
 dt = 0.01
 T = 12
 t = np.arange(0, T, dt)
@@ -23,7 +19,6 @@ I_ramp = neuron.create_ramp_current(t, 1, 10, -5, 30)
 pulse_times = [0, 6, 10, 15, 20, 30, 31]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
 I_ext = I_ramp
-print(I_ext)
 # a = neuron.simulate(T, dt, [-70, 0], I_ext)    
 neuron.dt = dt
 a = neuron.simulate_with_perturbations(T, dt, [- 30, 0.4], I_ext, perturbations=[(6.2, -10, 0.0)])
@@ -31,7 +26,6 @@ a = neuron.simulate_with_perturbations(T, dt, [- 30, 0.4], I_ext, perturbations=
 # Equilibria and limit cycle
 equilibria = neuron.find_equlibrium_points(0, [-90, 20] )
 # Placeholder for dynamic equilibrium points
-equilibrium_scatters = []
 limit_cycle = neuron.find_limit_cycle(1)
 
 # --- Create Figure & Grid Layout ---
@@ -59,6 +53,7 @@ ax2.grid(True, linestyle="--", alpha=0.6)
 # line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1])
 # Create a Line2D object for dynamic V-nullcline
 dynamic_V_nullcline, = ax2.plot([], [], color='orange', linestyle='--', label='V Nullcline')
+dynamic_limit_cycle, = ax2.plot([], [], color='indigo', linestyle='--', label='Limit Cycle')
 # dynamic_equilibria_plot, = ax2.plot([], [], marker = 'o', label='Equilibria', zorder=3, lw = 0)  # 'ko' means black circles
 # Persistent plot handles for each equilibrium type
 stable_eq_plot, = ax2.plot([], [], 'bo', label='Stable', zorder=3)     # Blue circles
@@ -83,6 +78,9 @@ ax3.set_title("External Current vs Time")
 ax3.grid(True, linestyle="--", alpha=0.6)
 line2, = ax3.plot(a[0], I_ext, marker = 'o', markevery = [-1])
 # line2, = ax3.plot(a[0], I_ext(t), marker = 'o', markevery = [-1])
+# To store previously computed limit cycle
+prev_limit_cycle_data = {"x": [], "y": []}
+
 
 # --- Animation Update Function ---
 def update(frame):
@@ -95,10 +93,21 @@ def update(frame):
     V_ncline = neuron.V_nullcline(V_vals, current_I)
     dynamic_V_nullcline.set_data(V_vals, V_ncline)
 
-    # --- Recalculate and plot new equilibria ---
+    # Update equilibria
     dynamic_equilibria = neuron.find_equlibrium_points(current_I, [-90, 20])
 
-    # Separate by stability type
+    # Update limit cycle only every 5th frame
+    if frame % 100 == 0:
+        lc = neuron.find_limit_cycle(current_I)
+        if lc is not None:
+            prev_limit_cycle_data["x"], prev_limit_cycle_data["y"] = lc[0], lc[1]
+        else:
+            prev_limit_cycle_data["x"], prev_limit_cycle_data["y"] = [], []
+
+    # Always update the plot from previous data (even if not newly computed)
+    dynamic_limit_cycle.set_data(prev_limit_cycle_data["x"], prev_limit_cycle_data["y"])
+
+    # Classify and plot equilibria
     stable_x, stable_y = [], []
     unstable_x, unstable_y = [], []
     saddle_x, saddle_y = [], []
@@ -115,24 +124,17 @@ def update(frame):
             saddle_x.append(x)
             saddle_y.append(y)
 
-    # Update plot data
     stable_eq_plot.set_data(stable_x, stable_y)
     unstable_eq_plot.set_data(unstable_x, unstable_y)
     saddle_eq_plot.set_data(saddle_x, saddle_y)
-    # if dynamic_equilibria:
-    #     eq_x = [eq['point'][0] for eq in dynamic_equilibria]
-    #     eq_y = [eq['point'][1] for eq in dynamic_equilibria]
-    #     # dynamic_equilibria_plot.set_data(eq_x, eq_y)
-    # else:
-    #     # dynamic_equilibria_plot.set_data([], [])
 
-    return line2, dynamic_V_nullcline, stable_eq_plot, unstable_eq_plot, saddle_eq_plot
+    return line2, dynamic_V_nullcline, stable_eq_plot, unstable_eq_plot, saddle_eq_plot, dynamic_limit_cycle
 
 
 
 
 # Create animation
-ani = animation.FuncAnimation(fig, update, frames=len(a[0]), interval=0.0001, blit=True)
+ani = animation.FuncAnimation(fig, update, frames=len(a[0]), interval=0.00001, blit=True)
 
 plt.tight_layout()
 plt.show()

@@ -16,10 +16,11 @@ neuron = NeuronModel('SNIC')
 dt = 0.01
 T = 20
 t = np.arange(0, T, dt)
+amp = 10
 
 # Creating different input currents
-I_step = neuron.create_step_current(t, 0.1, 20, 0, 10)
-I_ramp = neuron.create_ramp_current(t, 1, 10, 0, 5)
+I_step = neuron.create_step_current(t, 0.1, 20, 0, amp)
+I_ramp = neuron.create_ramp_current(t, 1, 10, 0, amp)
 pulse_times = [0, 5, 10, 15, 20, 25, 30]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
 I_ext = I_step
@@ -30,7 +31,7 @@ a = neuron.simulate(T, dt, [-70, 0], I_ext)
 #                                                                               (12, 5, 0.2)]) 
 
 # Equilibria and limit cycle
-equilibria = neuron.find_equlibrium_points(10, [-90, 20])
+equilibria = neuron.find_equlibrium_points(amp, [-90, 20])
 limit_cycle = neuron.find_limit_cycle(1)
 
 # --- Create Figure & Grid Layout ---

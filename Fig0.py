@@ -5,17 +5,21 @@ import matplotlib.gridspec as gridspec
 from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
-# Shows the dynamics phase space for saddle node neuron model
+# Fig : Saddle node neuron model
+# Basic integrator model 
+# Takes in currrent until it reaches a threshold and then it spikes and resets
+# Neuronal firing equations
+# Stable, unstable and saddle nodes
+# Limit cycle and equilibria points
 
-neuron = NeuronModel('saddle_node')
+neuron = NeuronModel('supercritical_Hopf')
 dt = 0.01
 T = 20
 t = np.arange(0, T, dt)
 
-amp = 0
 # Creating different input currents
-I_step = neuron.create_step_current(t, 0.1, 80, 0, amp)
-I_ramp = neuron.create_ramp_current(t, 1, 10, 0, amp)
+I_step = neuron.create_step_current(t, 0.1, 80, 0, 0)
+I_ramp = neuron.create_ramp_current(t, 1, 10, 0, 5)
 pulse_times = [0, 5, 10, 15, 20, 25, 30]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
 I_ext = I_step
@@ -30,7 +34,7 @@ for init in initial_conditions:
     trajectories.append(traj)
 
 # Equilibria and limit cycle
-equilibria = neuron.find_equlibrium_points(amp, [-90, 20])
+equilibria = neuron.find_equlibrium_points(0, [-90, 20])
 limit_cycle = neuron.find_limit_cycle(1)
 
 # --- Create Figure & Grid Layout ---
@@ -56,11 +60,6 @@ for eq in equilibria:
     ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
     # ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
 # ax2.plot(limit_cycle[0], limit_cycle[1], color='blue', linestyle=':', label='Limit Cycle')
-ax2.plot(limit_cycle[0], limit_cycle[1], color='indigo', linestyle='--', label='Limit Cycle', alpha = 0.5)
-V_vals = np.linspace(-80, 20, 100)
-ax2.plot(V_vals, neuron.V_nullcline(V_vals, amp), color='red', linestyle='--', label='V Nullcline', alpha = 0.5)
-ax2.plot(V_vals, neuron.n_nullcline(V_vals), color='green', linestyle='--', label='n Nullcline', alpha = 0.5)
-ax2.legend()
 ax2.legend()
 
 # --- Animation Update Function ---

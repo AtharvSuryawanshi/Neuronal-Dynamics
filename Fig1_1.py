@@ -54,7 +54,7 @@ ax2.set_ylabel("n")
 ax2.set_title("Phase Plot")
 # ax2.set_xlim([np.min(a[1][:, 0]) - 5, np.max(a[1][:, 0]) + 5])
 ax2.set_ylim(-0.1, 1)
-ax2.set_xlim(-80, 50)
+ax2.set_xlim(-80, -20)
 ax2.grid(True, linestyle="--", alpha=0.6)
 line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1], color = 'black', linewidth = 0)
 
