@@ -35,20 +35,21 @@ limit_cycle = neuron.find_limit_cycle(1)
 fig = plt.figure(figsize=(15, 6))
 gs = gridspec.GridSpec(2, 2, height_ratios=[3, 1], width_ratios=[1, 1])
 
+plt.suptitle("Large perturbation", fontsize=18)
 # --- Left Panel (Membrane Potential vs Time) ---
 ax1 = fig.add_subplot(gs[0, 0])
-ax1.set_ylabel("Membrane Potential (mV)")
-# ax1.set_xticks([])
+ax1.set_ylabel("Membrane Potential (mV)", fontsize=14)
+ax1.set_xticklabels([])
 # ax1.set_ylim([-80, 20])
-ax1.set_title("Membrane Potential vs Time")
+# ax1.set_title("Membrane Potential vs Time")
 ax1.grid(True, linestyle="--", alpha=0.6)
 line0, = ax1.plot(a[0][:], a[1][:, 0][:], marker = 'o', markevery = [-1])
 
 
 # --- Right Panel (Phase Space Plot) ---
 ax2 = fig.add_subplot(gs[:, 1])
-ax2.set_xlabel("Membrane Potential (mV)")
-ax2.set_ylabel("n")
+ax2.set_xlabel("Membrane Potential (mV)", fontsize=14)
+ax2.set_ylabel("$K^+$ activation", fontsize=14)
 ax2.set_title("Phase Plot")
 # ax2.set_xlim([np.min(a[1][:, 0]) - 5, np.max(a[1][:, 0]) + 5])
 # ax2.set_ylim(-0.1, 1)
@@ -67,15 +68,18 @@ ax2.legend()
 
 # --- Bottom Panel (Current vs Time) ---
 ax3 = fig.add_subplot(gs[1, 0])  # Takes full width
-ax3.set_xlabel("Time (ms)")
-ax3.set_ylabel("I_ext ($uA/cm^2$)")
-ax3.set_title("External Current vs Time")
+ax3.set_xlabel("Time (ms)", fontsize=14)
+ax3.set_ylabel("$I_{ext}$ ($uA/cm^2$)", fontsize=14)
+# ax3.set_title("External Current vs Time")
 ax3.grid(True, linestyle="--", alpha=0.6)
+
 line2, = ax3.plot(a[0], I_ext, marker = 'o', markevery = [-1])
 # line2, = ax3.plot(a[0], I_ext(t), marker = 'o', markevery = [-1])
 
 # --- Animation Update Function ---
 def update(frame):
+    if frame % 100 == 0:
+        print(f'Rendering Frame {frame}')   
     # Membrane potential vs time
     line0.set_data(a[0][:frame], a[1][:, 0][:frame])
 
@@ -89,7 +93,11 @@ def update(frame):
     return line0, line1, line2
 
 # Create animation
-ani = animation.FuncAnimation(fig, update, frames=len(a[0]), interval=0.0001, blit=True)
-
+print("Creating animation...")
+print("Total frames:", len(a[0]))
+ani = animation.FuncAnimation(fig, update, frames=range(0, len(a[0]), 5), interval=0.0001, blit=True)
 plt.tight_layout()
-plt.show()
+# plt.show()
+
+ani.save('Neuronal-Dynamics/animations/large_pert.mp4', writer='ffmpeg', fps=60)
+print("Done saving as mp4.")
