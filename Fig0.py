@@ -5,80 +5,104 @@ import matplotlib.gridspec as gridspec
 from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
-# Fig : Saddle node neuron model
-# Basic integrator model 
-# Takes in currrent until it reaches a threshold and then it spikes and resets
-# Neuronal firing equations
-# Stable, unstable and saddle nodes
-# Limit cycle and equilibria points
+# Takes two neurons and compares their dynamics
+# Same input current, slightly different initial state 
+# Drastically different dynamics
 
-neuron = NeuronModel('supercritical_Hopf')
+neuron = NeuronModel('saddle_node')
 dt = 0.01
 T = 20
 t = np.arange(0, T, dt)
 
+amp = 1
+neuron.dt = dt
 # Creating different input currents
-I_step = neuron.create_step_current(t, 0.1, 80, 0, 0)
-I_ramp = neuron.create_ramp_current(t, 1, 10, 0, 5)
+I_step = neuron.create_step_current(t, 0.1, 20, 0, amp)
+I_ramp = neuron.create_ramp_current(t, 1, 10, 0, amp)
 pulse_times = [0, 5, 10, 15, 20, 25, 30]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
 I_ext = I_step
-
-num_trajectories = 200
-initial_conditions = np.random.uniform(low=[-80, 0], high=[50, 0.6], size=(num_trajectories, 2))
-
-a1 = neuron.simulate(T, dt, [-67, 0], I_ext)
-trajectories = []
-for init in initial_conditions:
-    traj = neuron.simulate(T, dt, init, I_ext)
-    trajectories.append(traj)
-
+# a = neuron.simulate(T, dt, [-35, 0], I_ext)
+# b = neuron.simulate(T, dt, [-40, 0], I_ext)
+a = neuron.simulate_with_perturbations(T, dt, [-40, 0], I_ext, perturbations=[(0, 0, 0.0)])
+b = neuron.simulate_with_perturbations(T, dt, [-40, 0], I_ext, perturbations=[(0.1, +4, 0.0)])
 # Equilibria and limit cycle
-equilibria = neuron.find_equlibrium_points(0, [-90, 20])
+equilibria = neuron.find_equlibrium_points(amp, [-90, 20])
 limit_cycle = neuron.find_limit_cycle(1)
 
 # --- Create Figure & Grid Layout ---
-fig, ax2 = plt.subplots(1,1, figsize=(12, 8))
-# --- (Phase Space Plot) ---
-ax2.set_xlabel("Membrane Potential (mV)")
-ax2.set_ylabel("n")
-ax2.set_title("Phase Plot")
-# ax2.set_ylim(-0.1, 1)
-# ax2.set_xlim(-100, -20)
-ax2.grid(True, linestyle="--", alpha=0.6)
-line1, = ax2.plot(a1[1][:, 0], a1[1][:, 1], marker = 'o', markevery = [-1], color = 'black', linewidth = 0)
-# line1b, = ax2.plot([], [], marker='o', markevery=[-1], color='green')   # Phase space for a2
-# Before animation: Create line handles for each trajectory
-lines = []
-for traj in trajectories:
-    # Plot an empty line initially; will update it during animation
-    line, = ax2.plot(traj[1][:,0], traj[1][:, 1], markevery = [-1], color = 'teal', alpha = 0.2, lw=1)
-    lines.append(line)
+fig = plt.figure(figsize=(10, 6))
+gs = gridspec.GridSpec(2, 2, height_ratios=[3, 1], width_ratios=[1, 0])
+fig.suptitle("Two Neurons with same input, different behavior", fontsize=16)
+# --- Left Panel (Membrane Potential vs Time) ---
+ax1 = fig.add_subplot(gs[0, 0])
+ax1.set_ylabel("Membrane Potential (mV)", fontsize=14)  
+# ax1.set_xticks([])
+ax1.set_xticklabels([])
+# ax1.set_ylim([-80, 20])
+# ax1.set_title("Membrane Potential vs Time")
+ax1.grid(True, linestyle="--", alpha=0.6)
+line0, = ax1.plot(a[0][:], a[1][:, 0][:], marker = 'o', markevery = [-1], label = 'Neuron 1', color = 'navy')
+line0b, = ax1.plot(b[0][:], b[1][:, 0][:], marker = 'o', markevery = [-1], label = 'Neuron 2', color = 'tomato')
+ax1.legend(loc = 1)
 
-# Equilibrium points
-for eq in equilibria:
-    ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
-    # ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
-# ax2.plot(limit_cycle[0], limit_cycle[1], color='blue', linestyle=':', label='Limit Cycle')
-ax2.legend()
+# # --- Right Panel (Phase Space Plot) ---
+# ax2 = fig.add_subplot(gs[:, 1])
+# ax2.set_xlabel("Membrane Potential (mV)")
+# ax2.set_ylabel("n")
+# ax2.set_title("Phase Plot")
+# # ax2.set_xlim([np.min(a[1][:, 0]) - 5, np.max(a[1][:, 0]) + 5])
+# ax2.set_ylim(-0.1, 1)
+# ax2.set_xlim(-80, 20)
+# ax2.grid(True, linestyle="--", alpha=0.6)
+# line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1], color = 'black', linewidth = 1)
+# line1b, = ax2.plot([], [], marker='o', markevery=[-1], color='green')   # Phase space for a2
+
+
+# # Equilibrium points
+# for eq in equilibria:
+#     ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
+#     # ax2.scatter(eq['point'][0], eq['point'][1], label=eq['stability'], zorder=3, marker='X', s=100, edgecolor='black')
+# # ax2.plot(limit_cycle[0], limit_cycle[1], color='blue', linestyle=':', label='Limit Cycle')
+# ax2.legend()
+
+# --- Bottom Panel (Current vs Time) ---
+ax3 = fig.add_subplot(gs[1, 0])  # Takes full width
+ax3.set_xlabel("Time (ms)", fontsize=14)
+ax3.set_ylabel("$I_{ext}$ ($uA/cm^2$)", fontsize=14)
+# ax3.set_title("External Current vs Time")
+ax3.set_ylim(0, 1.1)
+ax3.grid(True, linestyle="--", alpha=0.6)
+line2, = ax3.plot(a[0], I_ext, marker = 'o', markevery = [-1], color = 'black')   
+line2b, = ax3.plot(b[0], I_ext, marker = 'o', markevery = [-1])
+# line2, = ax3.plot(a[0], I_ext(t), marker = 'o', markevery = [-1])
 
 # --- Animation Update Function ---
 def update(frame):
-    # line1.set_data(a1[1][:, 0][:frame], a1[1][:, 1][:frame])
-    for i, traj in enumerate(trajectories):
-        lines[i].set_data(traj[1][:, 0][:frame], traj[1][:, 1][:frame])
-    return lines
+    if frame % 100 == 0:
+        print(f'Rendering Frame {frame}')   
+    # Membrane potential vs time
+    line0.set_data(a[0][:frame], a[1][:, 0][:frame])
+    line0b.set_data(b[0][:frame], b[1][:, 0][:frame])
 
+    # Phase space (V vs n)
+    # line1.set_data(a[1][:, 0][:frame], a[1][:, 1][:frame])
+    # line1b.set_data(b[1][:, 0][:frame], b[1][:, 1][:frame])
 
+    # External current vs time
+    # line2.set_data(a[0][:frame], I_ext(t[:frame]))
+    line2.set_data(a[0][:frame], I_ext[:frame])
+    line2b.set_data(b[0][:frame], I_ext[:frame])
+
+    return line0, line2, line0b, line2b
+    # return line0, line1, line2, line0b, line1b, line2b
 
 # Create animation
-ani = animation.FuncAnimation(fig, update, frames=len(a1[1]), interval=0.1, blit=True)
+print("Creating animation...")
+print("Total frames:", len(a[0]))
+ani = animation.FuncAnimation(fig, update, frames=range(0, len(a[0]), 5), interval=0.0001, blit=True)
 
-plt.tight_layout()
-plt.show()
-
-# from matplotlib.animation import FFMpegWriter
-
-# writer = FFMpegWriter(fps=30, metadata=dict(artist='YourName'), bitrate=1800)
-
-# ani.save("animation.mp4", writer=writer)
+# plt.show()
+# print(f"Saving {ani.save_count} frames as GIF...") 
+ani.save('Neuronal-Dynamics/animations/two_neurons.mp4', writer='ffmpeg', fps=60)
+print("Done saving as mp4.")
