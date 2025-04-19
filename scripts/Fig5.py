@@ -8,7 +8,7 @@ from neuron_model import NeuronModel
 # Fig: V and n nullclines and their change with time,also limit cycle
 
 
-neuron = NeuronModel('saddle_node')  
+neuron = NeuronModel('supercritical_Hopf')  
 dt = 0.01
 T = 12
 t = np.arange(0, T, dt)
@@ -54,7 +54,7 @@ ax2.grid(True, linestyle="--", alpha=0.6)
 # line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1])
 # Create a Line2D object for dynamic V-nullcline
 dynamic_V_nullcline, = ax2.plot([], [], color='orange', linestyle='--', label='V Nullcline')
-dynamic_limit_cycle, = ax2.plot([], [], color='indigo', linestyle='--', label='Limit Cycle')
+dynamic_limit_cycle, = ax2.plot([], [], color='indigo', label='Limit Cycle')
 # dynamic_equilibria_plot, = ax2.plot([], [], marker = 'o', label='Equilibria', zorder=3, lw = 0)  # 'ko' means black circles
 # Persistent plot handles for each equilibrium type
 stable_eq_plot, = ax2.plot([], [], 'bo', label='Stable', zorder=3)     # Blue circles

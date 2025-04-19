@@ -33,8 +33,8 @@ class NeuronModel:
             self.g_L = 8     
 
         # Reversal potentials (mV)
-        self.E_Na = 60.0
-        self.E_K = -90.0
+        self.E_Na = 60.0    
+        self.E_K = -90.0    
 
         if self.potassium_threshold == 'high':  
             self.E_L = -80
@@ -591,8 +591,9 @@ class NeuronModel:
             return [-x for x in self.dALLdt(X, t, I_ext_t)]
         
         # Solve for both directions
-        sol_pos = odeint(dALLdt_backward, points_pos, t, args=(lambda t: I_ext,))
-        sol_neg = odeint(dALLdt_backward, points_neg, t, args=(lambda t: I_ext,))
+        # Solve for both directions with safer tolerances
+        sol_pos = odeint(dALLdt_backward, points_pos, t, args=(lambda t: I_ext,), rtol=1e-6, atol=1e-9)
+        sol_neg = odeint(dALLdt_backward, points_neg, t, args=(lambda t: I_ext,), rtol=1e-6, atol=1e-9)
         
         # Combine solutions (reverse one of them to get continuous curve)
         V_separatrix = np.concatenate([sol_neg[::-1, 0], sol_pos[:, 0]])
