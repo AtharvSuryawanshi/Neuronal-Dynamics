@@ -20,7 +20,7 @@ t = np.arange(0, T, dt)
 # Creating different input currents
 I_step = neuron.create_step_current(t, 10, 20, 0, 20)
 I_ramp = neuron.create_ramp_current(t, 1, 10, 0, 5)
-pulse_times = [0, 5, 10, 20, 30]  
+pulse_times = np.arange(0, 50, 2)
 I_pulse = neuron.create_pulse_train(t, pulse_times, 1, 0, 50)
 I_ext = I_pulse
 a = neuron.simulate(T, dt, [-70, 0], I_ext)    
@@ -84,7 +84,7 @@ def update(frame):
     return line0, line1, line2
 
 # Create animation
-ani = animation.FuncAnimation(fig, update, frames=len(a[0]), interval=0.0001, blit=True)
+ani = animation.FuncAnimation(fig, update, frames=range(0, len(a[0]),5), interval=0.0001, blit=True)
 
 plt.tight_layout()
 plt.show()
