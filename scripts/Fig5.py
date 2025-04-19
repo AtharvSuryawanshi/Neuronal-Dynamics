@@ -13,9 +13,12 @@ dt = 0.01
 T = 12
 t = np.arange(0, T, dt)
 
+amp = 1
+neuron.dt = dt
+
 # Creating different input currents
 I_step = neuron.create_step_current(t, 1, 80, 0, 0)
-I_ramp = neuron.create_ramp_current(t, 1, 10, -5, 30)
+I_ramp = neuron.create_ramp_current(t, 1, 10, -5, 50)
 # I_ramp = neuron.create_ramp_current(t, 1, 10, 20, 70)
 pulse_times = [0, 6, 10, 15, 20, 30, 31]  
 I_pulse = neuron.create_pulse_train(t, pulse_times, 3, 0, 50)
@@ -45,8 +48,8 @@ gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
 
 # --- Right Panel (Phase Space Plot) ---
 ax2 = fig.add_subplot(gs[0, 0])
-ax2.set_xlabel("Membrane Potential (mV)")
-ax2.set_ylabel("n")
+ax2.set_xlabel("Membrane Potential (mV)", fontsize=14)
+ax2.set_ylabel("$K^+$ activation", fontsize=14)
 ax2.set_title("Phase Plot")
 # ax2.set_xlim([np.min(a[1][:, 0]) - 5, np.max(a[1][:, 0]) + 5])
 # ax2.set_ylim([np.min(a[1][:, 1]) - 1, np.max(a[1][:, 1]) + 1])
@@ -54,7 +57,7 @@ ax2.grid(True, linestyle="--", alpha=0.6)
 # line1, = ax2.plot(a[1][:, 0], a[1][:, 1], marker = 'o', markevery = [-1])
 # Create a Line2D object for dynamic V-nullcline
 dynamic_V_nullcline, = ax2.plot([], [], color='orange', linestyle='--', label='V Nullcline')
-dynamic_limit_cycle, = ax2.plot([], [], color='indigo', label='Limit Cycle')
+dynamic_limit_cycle, = ax2.plot([], [], color='pink', label='Limit Cycle')
 # dynamic_equilibria_plot, = ax2.plot([], [], marker = 'o', label='Equilibria', zorder=3, lw = 0)  # 'ko' means black circles
 # Persistent plot handles for each equilibrium type
 stable_eq_plot, = ax2.plot([], [], 'bo', label='Stable', zorder=3)     # Blue circles
@@ -73,9 +76,9 @@ ax2.legend()
 
 # --- Bottom Panel (Current vs Time) ---
 ax3 = fig.add_subplot(gs[1, 0])  # Takes full width
-ax3.set_xlabel("Time (ms)")
-ax3.set_ylabel("I_ext ($uA/cm^2$)")
-ax3.set_title("External Current vs Time")
+ax3.set_xlabel("Time (ms)", fontsize=14)
+ax3.set_ylabel("$I_{ext}$ ($uA/cm^2$)", fontsize=14)
+# ax3.set_title("External Current vs Time")
 ax3.grid(True, linestyle="--", alpha=0.6)
 line2, = ax3.plot(a[0], I_ext, marker = 'o', markevery = [-1])
 # line2, = ax3.plot(a[0], I_ext(t), marker = 'o', markevery = [-1])
@@ -85,6 +88,8 @@ prev_limit_cycle_data = {"x": [], "y": []}
 
 # --- Animation Update Function ---
 def update(frame):
+    if frame % 100 == 0:
+        print(f'Rendering Frame {frame}')   
     # External current vs time
     line2.set_data(a[0][:frame], I_ext[:frame])
 
@@ -135,7 +140,11 @@ def update(frame):
 
 
 # Create animation
-ani = animation.FuncAnimation(fig, update, frames=len(a[0]), interval=0.00001, blit=True)
-
+print("Creating animation...")
+print("Total frames:", len(a[0]))
+ani = animation.FuncAnimation(fig, update, frames=range(0, len(a[0]), 5), interval=0.0001, blit=True)
 plt.tight_layout()
-plt.show()
+# plt.show()
+
+ani.save('Neuronal-Dynamics/animations/andr_bifurcation.mp4', writer='ffmpeg', fps=60)
+print("Done saving as mp4.")

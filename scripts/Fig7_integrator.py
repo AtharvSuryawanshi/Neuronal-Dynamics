@@ -13,7 +13,7 @@ from neuron_model import NeuronModel
 # Limit cycle and equilibria points
 
 neuron = NeuronModel('saddle_node')    
-dt = 0.01   
+dt = 0.01
 T = 50
 t = np.arange(0, T, dt)
 

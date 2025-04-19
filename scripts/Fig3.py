@@ -6,13 +6,13 @@ from neuron_model import NeuronModel
 
 # Simulating neuron dynamics
 # Shows the dynamics phase space for saddle node neuron model
-
-neuron = NeuronModel('saddle_node')
+# neuron = NeuronModel('SNIC') 
+neuron = NeuronModel('subcritical_Hopf')
 dt = 0.01
 T = 20
 t = np.arange(0, T, dt)
 
-amp = 0
+amp = 55
 # Creating different input currents
 I_step = neuron.create_step_current(t, 0.1, 80, 0, amp)
 I_ramp = neuron.create_ramp_current(t, 1, 10, 0, amp)
@@ -39,7 +39,7 @@ fig, ax2 = plt.subplots(1,1, figsize=(10, 8))
 # --- (Phase Space Plot) ---
 ax2.set_xlabel("Membrane Potential (mV)", fontsize=14)  
 ax2.set_ylabel("$K^+$ activation", fontsize=14)
-ax2.set_title("Phase Plot", fontsize=20)
+# ax2.set_title("Saddle Node", fontsize=20)
 # ax2.set_ylim(-0.1, 1)
 # ax2.set_xlim(-100, -20)
 ax2.grid(True, linestyle="--", alpha=0.1)
@@ -76,9 +76,9 @@ def update(frame):
 # Create animation
 print("Creating animation...")
 print("Total frames:", len(a1[0]))
-ani = animation.FuncAnimation(fig, update, frames=range(0, len(trajectories[0][1][:,0]), 5), interval=0.0001, blit=True)
+ani = animation.FuncAnimation(fig, update, frames=range(0, len(trajectories[0][1][:,0]), 5), interval=0.001, blit=True)
 plt.tight_layout()
-plt.show()
+# plt.show()
 
-# ani.save('Neuronal-Dynamics/animations/phase_trajectories.mp4', writer='ffmpeg', fps=60)
-# print("Done saving as mp4.")
+ani.save('Neuronal-Dynamics/animations/phase_trajectories_sub2.mp4', writer='ffmpeg', fps=15)
+print("Done saving as mp4.")
